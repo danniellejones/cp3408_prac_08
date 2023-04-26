@@ -25,11 +25,34 @@ public class Bot : MonoBehaviour
         agent.SetDestination(this.transform.position - fleeVector);
     }
 
+    void Pursue()
+    {
+        Vector3 targetDir = target.transform.position - this.transform.position;
+
+        // Calculate angle between forward directions - put into same relative space
+        float relativeHeading = Vector3.Angle(this.transform.forward, this.transform.TransformVector(target.transform.forward));
+        
+        // Calculate angle between forward direction of angle and direction to target
+        float toTarget = Vector3.Angle(this.transform.forward, this.transform.TransformVector(targetDir));
+
+        // If target has stopped moving
+        if ((toTarget > 90 && relativeHeading < 20) || target.GetComponent<Drive>().currentSpeed < 0.01f)
+        {
+            Seek(target.transform.position);
+            return;
+        }
+
+
+        float lookAhead = targetDir.magnitude/(agent.speed + target.GetComponent<Drive>().currentSpeed);
+        Seek(target.transform.position + target.transform.forward * lookAhead);
+    }
+
     // Update is called once per frame
     void Update()
     {
         // Seek(target.transform.position);
-        Flee(target.transform.position);
+        // Flee(target.transform.position);
+        Pursue();
        
     }
 }
